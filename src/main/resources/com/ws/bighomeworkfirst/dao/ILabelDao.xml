@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ws.bighomeworkfirst.dao.ILabelDao">
+    <!-- 获取全部标签-->
+    <select id="getAllLabel" resultType="com.ws.bighomeworkfirst.domain.Label">
+        select * from label;
+    </select>
+
+    <!-- 根据 标签id 获取全部博文-->
+    <select id="getArticlesByLabelId" resultType="com.ws.bighomeworkfirst.domain.Article" parameterType="java.lang.Integer">
+        select * from article where article_id in
+        (select con_l_a_article_id from con_l_a where con_l_a_label_id=#{labelId});
+    </select>
+
+    <!-- 根据 标签title 获取全部博文-->
+    <select id="getArticlesByLabelTitle" resultType="com.ws.bighomeworkfirst.domain.Article" parameterType="java.lang.String">
+        select * from article where article_id in
+        (select con_l_a_article_id from con_l_a where con_l_a_label_id in
+        (select label_id from label where label_name=#{labelTitle}));
+    </select>
+
+    <!-- 递交新label -->
+    <insert id="commitLabel" parameterType="com.ws.bighomeworkfirst.domain.Label">
+        <selectKey keyProperty="label_id" keyColumn="label_id" order="AFTER" resultType="java.lang.Integer">
+            select last_insert_id();
+        </selectKey>
+        insert into label(label_name,label_description)values(#{label_name},#{label_description});
+    </insert>
+
+    <select id="getLabelPaged" resultType="com.ws.bighomeworkfirst.domain.Label" parameterType="java.lang.Integer">
+        select * from label limit #{startIndex},#{num};
+    </select>
+
+    <select id="getLabelNum" resultType="java.lang.Integer">
+        select count(*) from label;
+    </select>
+
+    <select id="getNumByName" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(*) from article where article_id in
+        (select con_l_a_article_id from con_l_a where con_l_a_label_id in
+        (select label_id from label where label_name=#{labelTitle}));
+    </select>
+
+</mapper>

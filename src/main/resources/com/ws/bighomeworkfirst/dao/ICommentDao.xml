@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ws.bighomeworkfirst.dao.ICommentDao">
+    <resultMap id="childParentMap" type="com.ws.bighomeworkfirst.domain.Comment">
+        <id property="comment_id" column="comment_id"></id>
+        <result property="comment_user_name" column="comment_user_name"></result>
+        <result property="comment_article_id" column="comment_article_id"></result>
+        <result property="comment_like_count" column="comment_like_count"></result>
+        <result property="comment_date" column="comment_date"></result>
+        <result property="comment_content" column="comment_content"></result>
+
+        <collection property="childComments" ofType="com.ws.bighomeworkfirst.domain.ChildComment">
+            <id property="comment_id" column="child_comment_id"></id>
+            <result property="comment_user_name" column="child_comment_user_name"></result>
+            <result property="comment_like_count" column="child_comment_like_count"></result>
+            <result property="comment_date" column="child_comment_date"></result>
+            <result property="comment_content" column="child_comment_content"></result>
+            <result property="comment_parent_id" column="child_comment_parent_id"></result>
+            <result property="comment_to_user_name" column="child_comment_to_user_name"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 提交评论-->
+    <insert id="commitComment" parameterType="com.ws.bighomeworkfirst.domain.Comment">
+        <selectKey keyProperty="comment_id" keyColumn="comment_id" order="AFTER" resultType="java.lang.Integer">
+            select last_insert_id();
+        </selectKey>
+        insert into comment(comment_user_name,comment_article_id,comment_like_count,comment_date,comment_content)values(#{comment_user_name},#{comment_article_id},#{comment_like_count},#{comment_date},#{comment_content});
+    </insert>
+
+    <!-- 获取全部评论-->
+    <select id="getAllComment" resultMap="childParentMap">
+        select c.*,ch.child_comment_id,ch.child_comment_user_name,ch.child_comment_like_count,ch.child_comment_date,ch.child_comment_content,
+        ch.child_comment_parent_id,ch.child_comment_to_user_name from comment c left join child_comment ch on c.comment_id = ch.child_comment_parent_id;
+    </select>
+
+    <!-- 加一个 根据articleId获取所有 评论 包括子评论的 -->
+    <select id="getCommentsByArticleId" resultMap="childParentMap" parameterType="java.lang.Integer">
+        select c.*,ch.child_comment_id,ch.child_comment_user_name,ch.child_comment_like_count,ch.child_comment_date,ch.child_comment_content,
+        ch.child_comment_parent_id,ch.child_comment_to_user_name from comment c left join child_comment ch on c.comment_id = ch.child_comment_parent_id
+        where c.comment_article_id =#{articleId};
+    </select>
+    <!-- 修改 -->
+    <!-- 获取所有子评论-->
+    <select id="getAllChildrenComment" resultType="com.ws.bighomeworkfirst.domain.Comment" parameterType="java.lang.Integer">
+        select * from comment where parent_comment_id=#{commentId}
+    </select>
+
+    <delete id="deleteComment" parameterType="java.lang.Integer">
+        delete from comment where comment_id = #{commentId};
+    </delete>
+</mapper>

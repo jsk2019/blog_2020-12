@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ws.bighomeworkfirst.dao.IUserDao">
+    <!-- 配置 用户 博文 一对多 结果映射-->
+    <resultMap id="userAndArticleMap" type="com.ws.bighomeworkfirst.domain.User">
+        <id property="user_id" column="user_id"></id>
+        <result property="user_name" column="user_name"></result>
+        <result property="user_password" column="user_password"></result>
+        <result property="user_sex" column="user_sex"></result>
+        <result property="user_email" column="user_email"></result>
+        <result property="user_photo" column="user_photo"></result>
+        <result property="user_registration_time" column="user_registration_time"></result>
+        <result property="user_birthday" column="user_birthday"></result>
+        <result property="user_age" column="user_age"></result>
+        <result property="user_telephone_number" column="user_telephone_number"></result>
+        <result property="user_nickname" column="user_nickname"></result>
+
+        <collection property="articles" ofType="com.ws.bighomeworkfirst.domain.Article">
+            <id property="article_id" column="article_id"></id>
+            <result property="article_user_id" column="article_user_id"></result>
+            <result property="article_title" column="article_title"></result>
+            <result property="article_content" column="article_content"></result>
+            <result property="article_comment_count" column="article_comment_count"></result>
+            <result property="article_create_date" column="article_create_date"></result>
+            <result property="article_like_count" column="article_like_count"></result>
+            <result property="article_views" column="article_views"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 查询所有用户-->
+    <select id="searchAll" resultType="com.ws.bighomeworkfirst.domain.User">
+        select * from user;
+    </select>
+
+    <!--注册用户-->
+    <insert id="registerUser" parameterType="com.ws.bighomeworkfirst.domain.User">
+        <selectKey keyProperty="user_id" keyColumn="user_id" order="AFTER" resultType="java.lang.Integer">
+            select last_insert_id();
+        </selectKey>
+        insert  into user(user_name,user_password,user_email,user_photo,user_registration_time,user_birthday,user_age,user_telephone_number,user_nickname)values(#{user_name},#{user_password},#{user_email},#{user_photo},#{user_registration_time},#{user_birthday},#{user_age},#{user_telephone_number},#{user_nickname});
+    </insert>
+
+    <!-- 查询单个用户 并返回所有博文 使用一对多结果映射-->
+    <select id="getUserById" resultMap="userAndArticleMap" parameterType="java.lang.Integer">
+        select u.*,a.article_id,a.article_user_id,a.article_title,a.article_content,a.article_comment_count,a.article_create_date,a.article_like_count,a.article_views from user u,article a where u.user_id=a.article_user_id AND u.user_id=#{userId};
+    </select>
+
+    <select id="getPassword" resultType="java.lang.String" parameterType="java.lang.String">
+        select user_password from user where user_name=#{userName};
+    </select>
+</mapper>

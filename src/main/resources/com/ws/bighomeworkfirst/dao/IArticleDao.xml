@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ws.bighomeworkfirst.dao.IArticleDao">
+    <!-- 配置博文和评论 一对多 结果映射-->
+    <resultMap id="articleAndCommentMap" type="com.ws.bighomeworkfirst.domain.Article">
+        <id property="article_id" column="article_id"></id>
+        <result property="article_user_id" column="article_user_id"></result>
+        <result property="article_title" column="article_title"></result>
+        <result property="article_content" column="article_content"></result>
+        <result property="article_comment_count" column="article_comment_count"></result>
+        <result property="article_create_date" column="article_create_date"></result>
+        <result property="article_like_count" column="article_like_count"></result>
+        <result property="article_views" column="article_views"></result>
+
+        <!-- 配置一对多-->
+        <collection property="comments" ofType="com.ws.bighomeworkfirst.domain.Comment">
+            <id property="comment_id" column="comment_id"></id>
+            <result property="comment_user_name" column="comment_user_name"></result>
+            <result property="comment_article_id" column="comment_article_id"></result>
+            <result property="comment_like_count" column="comment_like_count"></result>
+            <result property="comment_date" column="comment_date"></result>
+            <result property="comment_content" column="comment_content"></result>
+        </collection>
+    </resultMap>
+
+    <!-- 提交博文-->
+    <insert id="commitArticle" parameterType="com.ws.bighomeworkfirst.domain.Article">
+        <selectKey keyProperty="article_id" keyColumn="article_id" order="AFTER" resultType="java.lang.Integer">
+            select last_insert_id();
+        </selectKey>
+        insert into article(article_user_id,article_title,article_content,article_views,article_comment_count,article_create_date,article_like_count)values(#{article_user_id},#{article_title},#{article_content},#{article_views},#{article_comment_count},#{article_create_date},#{article_like_count});
+    </insert>
+
+    <!-- 返回所有博文-->
+    <select id="getAllArticle" resultType="com.ws.bighomeworkfirst.domain.Article">
+        select * from article;
+    </select>
+
+    <!-- 根据博文id 获取所有评论 这个等会单独写吧-->
+
+    <!-- 根据博文id 获取博文详细信息 包括 评论 使用一对多结果映射-->
+    <select id="getArticleByArticleId" resultMap="articleAndCommentMap" parameterType="java.lang.Integer">
+        select a.*,c.comment_id,c.comment_user_name,c.comment_article_id,c.comment_like_count,c.comment_date,c.comment_content from article a left join comment c on a.article_id=c.comment_article_id where article_id = #{articleId};
+    </select>
+
+    <!-- 博文分页查询 -->
+    <select id="getArticlePaged" resultType="com.ws.bighomeworkfirst.domain.Article" parameterType="java.lang.Integer">
+        select * from article limit #{startIndex},#{num};
+    </select>
+
+    <!-- 博文标题模糊查询 -->
+    <select id="getArticleTitleVague" resultType="com.ws.bighomeworkfirst.domain.Article" parameterType="java.lang.String">
+        select * from article where article_title like #{keyWord};
+    </select>
+
+    <!-- 用于导航栏的模糊搜索 既包含标题 也 包含内容 -->
+    <select id="getArticleBySearch" resultType="com.ws.bighomeworkfirst.domain.Article" parameterType="java.lang.String">
+        select * from article where article_title like #{keyWord} or article_content like #{keyword};
+    </select>
+    <!-- 博文内容模糊查询 -->
+    <select id="getArticleContentVague" resultType="com.ws.bighomeworkfirst.domain.Article" parameterType="java.lang.String">
+        select * from article where article_content like #{keyWord};
+    </select>
+
+    <delete id="deleteArticleByArticleId" parameterType="java.lang.Integer">
+        delete from article where article_id =#{articleId};
+    </delete>
+
+    <!-- 获取浏览量 -->
+    <select id="getArticlesViewsByArticleId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        select article_views from article where article_id = #{articleId};
+    </select>
+
+    <!-- 设置浏览量 -->
+    <update id="setArticleViewsByArticleId" parameterType="java.lang.Integer">
+        update article set article_views = #{views} where article_id = #{articleId};
+    </update>
+
+    <!-- 修改博文 -->
+    <update id="changeArticle" parameterType="com.ws.bighomeworkfirst.domain.Article">
+        update article set article_user_id=#{article_user_id},article_title=#{article_title},
+        article_content=#{article_content},article_views=#{article_views},
+        article_comment_count=#{article_comment_count},article_create_date=#{article_create_date},
+        article_like_count=#{article_like_count} where article_id=#{article_id};
+    </update>
+
+    <select id="getTotalNum" resultType="java.lang.Integer">
+        select count(*) from article;
+    </select>
+</mapper>

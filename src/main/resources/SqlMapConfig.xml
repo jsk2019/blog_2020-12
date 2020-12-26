@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--配置连接信息 properties文件来源 -->
+    <properties resource="jdbcConfig.properties"></properties>
+
+    <!--配置实体类别名-->
+    <typeAliases>
+        <package name="com.ws.bighomeworkfirst.domain"/>
+    </typeAliases>
+
+    <!--配置环境-->
+    <environments default="mysql">
+        <environment id="mysql">
+            <!--配置事务-->
+            <transactionManager type="JDBC"></transactionManager>
+            <!--配置连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--配置映射文件位置-->
+    <mappers>
+        <mapper resource="com/ws/bighomeworkfirst/dao/IUserDao.xml"></mapper>
+        <mapper resource="com/ws/bighomeworkfirst/dao/IArticleDao.xml"></mapper>
+        <mapper resource="com/ws/bighomeworkfirst/dao/ICommentDao.xml"></mapper>
+        <mapper resource="com/ws/bighomeworkfirst/dao/ILabelDao.xml"></mapper>
+        <mapper resource="com/ws/bighomeworkfirst/dao/IChildCommentDao.xml"></mapper>
+    </mappers>
+</configuration>
